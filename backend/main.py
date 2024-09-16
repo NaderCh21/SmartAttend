@@ -1,125 +1,192 @@
+from fastapi import FastAPI, UploadFile, File, Form
+import shutil
 import os
 import uuid
 import pickle
-import datetime
-import time
-import shutil
-
 import cv2
-from fastapi import FastAPI, File, UploadFile, HTTPException
-from fastapi.responses import FileResponse
-from fastapi.middleware.cors import CORSMiddleware
 import face_recognition
-import starlette
-
-# Directory paths
-ATTENDANCE_LOG_DIR = './logs'
-DB_PATH = './db'
-for dir_ in [ATTENDANCE_LOG_DIR, DB_PATH]:
-    if not os.path.exists(dir_):
-        os.mkdir(dir_)
+import mysql.connector
+from pydantic import BaseModel
+import time
+import datetime
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
-# CORS Middleware
-origins = ["*"]
+# Allow requests from any origin (adjust this for production use)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["http://localhost:3000"],  # Can also use ["*"] to allow all origins, but it's not recommended for production
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["*"],  # Adjust if you want to restrict allowed HTTP methods (e.g., GET, POST)
+    allow_headers=["*"],  # Adjust if you want to restrict allowed headers
 )
 
-# Helper function to save files
-def save_file(file: UploadFile, filename: str) -> str:
+# Database configuration
+DB_CONFIG = {
+    'user': 'root',
+    'password': 'root',
+    'host': 'localhost',
+    'database': 'attendance_db'
+}
+
+# Paths
+DB_PATH = './db'  # Changed for cross-platform compatibility
+ATTENDANCE_LOG_DIR = './logs'
+
+# Ensure DB_PATH and ATTENDANCE_LOG_DIR directories exist
+os.makedirs(DB_PATH, exist_ok=True)
+os.makedirs(ATTENDANCE_LOG_DIR, exist_ok=True)
+
+def get_db_connection():
+    """Establish a connection to the MySQL database."""
+    return mysql.connector.connect(**DB_CONFIG)
+
+@app.post("/register_new_user")
+async def register_new_user(file: UploadFile = File(...), text: str = Form(...)):
     try:
-        with open(filename, "wb") as f:
-            f.write(file.file.read())
-        print(f"File saved as: {filename}")
-        return filename
+        # Generate unique filename
+        file.filename = f"{uuid.uuid4()}.png"
+        contents = await file.read()
+
+        # Save the uploaded file temporarily
+        with open(file.filename, "wb") as f:
+            f.write(contents)
+
+        # Check if the face can be encoded
+        image = cv2.imread(file.filename)
+        embeddings = face_recognition.face_encodings(image)
+        if len(embeddings) == 0:
+            os.remove(file.filename)
+            return {'registration_status': 'No face detected'}
+
+        # Save the image and embeddings
+        shutil.copy(file.filename, os.path.join(DB_PATH, f'{text}.png'))
+        with open(os.path.join(DB_PATH, f'{text}.pickle'), 'wb') as file_:
+            pickle.dump(embeddings, file_)
+
+        # Remove the temporary file
+        os.remove(file.filename)
+
+        # Add user to the database
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO students (name) VALUES (%s)", (text,))
+        conn.commit()
+
+        cursor.close()
+        conn.close()
+
+        return {'registration_status': 200}
+
+    except mysql.connector.IntegrityError:
+        return {'registration_status': 'User already exists'}
+    
     except Exception as e:
-        print(f"Error saving file: {e}")
-        raise HTTPException(status_code=500, detail="Error saving file")
+        return {'error': str(e)}
 
 @app.post("/login")
 async def login(file: UploadFile = File(...)):
-    filename = f"{uuid.uuid4()}.png"
-    filepath = save_file(file, filename)
-    
-    user_name, match_status = recognize(cv2.imread(filepath))
+    file.filename = f"{uuid.uuid4()}.png"
+    contents = await file.read()
+
+    # Save the file
+    with open(file.filename, "wb") as f:
+        f.write(contents)
+
+    # Recognize the user
+    user_name, match_status = recognize(cv2.imread(file.filename))
 
     if match_status:
         epoch_time = time.time()
         date = time.strftime('%Y%m%d', time.localtime(epoch_time))
-        log_file = os.path.join(ATTENDANCE_LOG_DIR, f'{date}.csv')
-        with open(log_file, 'a') as f:
-            f.write(f'{user_name},{datetime.datetime.now()},IN\n')
-        print(f"Log written: {user_name} checked in")
+        
+        # Fetch student ID
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT id FROM students WHERE name = %s", (user_name,))
+        student_id = cursor.fetchone()
+        student_id = student_id[0] if student_id else None
+
+        # Log attendance
+        if student_id:
+            with open(os.path.join(ATTENDANCE_LOG_DIR, f'{date}.csv'), 'a') as f:
+                f.write(f'{user_name},{datetime.datetime.now()},IN\n')
+            
+            cursor.execute("INSERT INTO attendance_logs (student_id, timestamp, status) VALUES (%s, NOW(), 'IN')", (student_id,))
+            conn.commit()
+
+        cursor.close()
+        conn.close()
+
+    os.remove(file.filename)
 
     return {'user': user_name, 'match_status': match_status}
 
 @app.post("/logout")
 async def logout(file: UploadFile = File(...)):
-    filename = f"{uuid.uuid4()}.png"
-    filepath = save_file(file, filename)
-    
-    user_name, match_status = recognize(cv2.imread(filepath))
+    file.filename = f"{uuid.uuid4()}.png"
+    contents = await file.read()
+
+    # Save the file
+    with open(file.filename, "wb") as f:
+        f.write(contents)
+
+    # Recognize the user
+    user_name, match_status = recognize(cv2.imread(file.filename))
 
     if match_status:
         epoch_time = time.time()
         date = time.strftime('%Y%m%d', time.localtime(epoch_time))
-        log_file = os.path.join(ATTENDANCE_LOG_DIR, f'{date}.csv')
-        with open(log_file, 'a') as f:
-            f.write(f'{user_name},{datetime.datetime.now()},OUT\n')
-        print(f"Log written: {user_name} checked out")
+        
+        # Fetch student ID
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT id FROM students WHERE name = %s", (user_name,))
+        student_id = cursor.fetchone()
+        student_id = student_id[0] if student_id else None
+
+        # Log attendance
+        if student_id:
+            with open(os.path.join(ATTENDANCE_LOG_DIR, f'{date}.csv'), 'a') as f:
+                f.write(f'{user_name},{datetime.datetime.now()},OUT\n')
+            
+            cursor.execute("INSERT INTO attendance_logs (student_id, timestamp, status) VALUES (%s, NOW(), 'OUT')", (student_id,))
+            conn.commit()
+
+        cursor.close()
+        conn.close()
+
+    os.remove(file.filename)
 
     return {'user': user_name, 'match_status': match_status}
 
-@app.post("/register_new_user")
-async def register_new_user(file: UploadFile = File(...), text: str = None):
-    if text is None:
-        raise HTTPException(status_code=400, detail="Text parameter is required")
-
-    filename = f"{uuid.uuid4()}.png"
-    filepath = save_file(file, filename)
+def recognize(image):
+    """Recognize the user in the provided image."""
+    known_face_encodings = []
+    known_face_names = []
     
-    shutil.copy(filepath, os.path.join(DB_PATH, f'{text}.png'))
+    # Load known encodings
+    for filename in os.listdir(DB_PATH):
+        if filename.endswith(".pickle"):
+            with open(os.path.join(DB_PATH, filename), 'rb') as file_:
+                known_face_encodings.append(pickle.load(file_))
+                known_face_names.append(filename.split('.')[0])
 
-    img = cv2.imread(filepath)
-    embeddings = face_recognition.face_encodings(img)
+    known_face_encodings = [encoding for encodings in known_face_encodings for encoding in encodings]
 
-    with open(os.path.join(DB_PATH, f'{text}.pickle'), 'wb') as file_:
-        pickle.dump(embeddings, file_)
-    print(f"User registered: {text}")
+    face_locations = face_recognition.face_locations(image)
+    face_encodings = face_recognition.face_encodings(image, face_locations)
 
-    os.remove(filepath)
-    return {'registration_status': 200}
+    for face_encoding in face_encodings:
+        matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
+        name = "Unknown"
 
-@app.get("/get_attendance_logs")
-async def get_attendance_logs():
-    filename = 'out.zip'
-    shutil.make_archive(filename[:-4], 'zip', ATTENDANCE_LOG_DIR)
-    return FileResponse(filename, media_type='application/zip', filename=filename)
+        if True in matches:
+            first_match_index = matches.index(True)
+            name = known_face_names[first_match_index]
 
-def recognize(img):
-    embeddings_unknown = face_recognition.face_encodings(img)
-    if len(embeddings_unknown) == 0:
-        return 'no_persons_found', False
-    embeddings_unknown = embeddings_unknown[0]
+        return name, name != "Unknown"
 
-    match = False
-    j = 0
-
-    db_dir = sorted([j for j in os.listdir(DB_PATH) if j.endswith('.pickle')])
-    while not match and j < len(db_dir):
-        path_ = os.path.join(DB_PATH, db_dir[j])
-        with open(path_, 'rb') as file:
-            embeddings = pickle.load(file)[0]
-        match = face_recognition.compare_faces([embeddings], embeddings_unknown)[0]
-        j += 1
-
-    if match:
-        return db_dir[j - 1][:-7], True
-    else:
-        return 'unknown_person', False
+    return "Unknown", False

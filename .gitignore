@@ -1,0 +1,22 @@
+# Node modules
+node_modules/
+
+# Python virtual environment
+venv/
+
+# Python cache files
+__pycache__/
+
+# Log files
+*.log
+
+# Environment variables
+.env
+
+# Temporary files
+*.tmp
+*.swp
+
+# Build directories
+build/
+dist/

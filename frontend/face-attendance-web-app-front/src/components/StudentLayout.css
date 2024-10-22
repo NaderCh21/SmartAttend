@@ -1,0 +1,51 @@
+/* Main layout for student section */
+.dashboard-layout {
+    display: flex;
+  }
+  
+  .sidebar {
+    width: 200px;
+    background-color: #2c3e50;
+    padding: 20px;
+    color: white;
+    height: 100vh;
+  }
+  
+  .sidebar-header {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+  }
+  
+  .sidebar-nav {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .nav-item {
+    color: white;
+    text-decoration: none;
+    margin-bottom: 10px;
+    padding: 10px;
+    background-color: #34495e;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+    cursor: pointer;
+  }
+  
+  .nav-item:hover {
+    background-color: #3b5998;
+  }
+  
+  .dropdown-list {
+    display: flex;
+    flex-direction: column;
+    background-color: #34495e;
+    padding: 5px;
+    margin-top: 5px;
+  }
+  
+  .main-content {
+    flex-grow: 1;
+    padding: 20px;
+  }
+  

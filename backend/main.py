@@ -46,6 +46,58 @@ def get_db_connection():
 @app.post("/register_new_user")
 async def register_new_user(file: UploadFile = File(...), text: str = Form(...)):
     try:
+        # Generate unique filename for the uploaded image
+        file.filename = f"{uuid.uuid4()}.png"
+        contents = await file.read()
+
+        # Save the uploaded file in the 'images' directory
+        images_dir = './images'
+        os.makedirs(images_dir, exist_ok=True)
+        file_path = os.path.join(images_dir, file.filename)
+
+        with open(file_path, "wb") as f:
+            f.write(contents)
+
+        # Check if the face can be encoded
+        image = cv2.imread(file_path)
+        embeddings = face_recognition.face_encodings(image)
+        if len(embeddings) == 0:
+            os.remove(file_path)
+            return {'registration_status': 'No face detected'}
+
+        # Check if this face is already registered
+        for filename in os.listdir(DB_PATH):
+            if filename.endswith(".pickle"):
+                with open(os.path.join(DB_PATH, filename), 'rb') as file_:
+                    known_encodings = pickle.load(file_)
+                    matches = face_recognition.compare_faces(known_encodings, embeddings[0], tolerance=0.6)
+                    if True in matches:
+                        os.remove(file_path)  # Clean up the uploaded file
+                        return {'registration_status': 'Face already registered'}
+
+        # If no match, proceed to save the new user
+        shutil.copy(file_path, os.path.join(DB_PATH, f'{text}.png'))
+        with open(os.path.join(DB_PATH, f'{text}.pickle'), 'wb') as file_:
+            pickle.dump(embeddings, file_)
+
+        # Add user to the database
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO students (name) VALUES (%s)", (text,))
+        conn.commit()
+
+        cursor.close()
+        conn.close()
+
+        return {'registration_status': 200}
+
+    except mysql.connector.IntegrityError:
+        return {'registration_status': 'User already exists'}
+    
+    except Exception as e:
+        return {'error': str(e)}
+
+    try:
         # Generate unique filename
         file.filename = f"{uuid.uuid4()}.png"
         contents = await file.read()

@@ -1,0 +1,20 @@
+/* LoginApp Styles */
+.login-form {
+    justify-content: center;
+    min-height: 90vh;
+}
+
+.login-background {
+    justify-content: center;
+    min-height: 30vh;
+    padding: 50px;
+}
+
+.button-block {
+    width: 100%;
+    margin-top: 1rem;
+}
+
+.MuiFormControlLabel-root {
+    margin-right: 1rem;
+}

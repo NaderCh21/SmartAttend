@@ -1,0 +1,21 @@
+.student-course-page {
+    margin-left: 220px;
+    padding: 20px;
+  }
+  
+  .course-details {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .course-details p {
+    font-size: 1.2rem;
+    margin: 10px 0;
+  }
+  
+  .course-details p strong {
+    color: #2c387e;
+  }
+  

@@ -1,0 +1,30 @@
+/* General styling for the Teacher Course page */
+
+.teacher-course-page {
+    margin-left: 220px; /* Assuming sidebar occupies 200px */
+    padding: 20px;
+  }
+  
+  .teacher-course-page h1 {
+    font-size: 2rem;
+    color: #3f51b5;
+    margin-bottom: 1rem;
+  }
+  
+  .course-details {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+  }
+  
+  .course-details p {
+    font-size: 1.2rem;
+    margin: 10px 0;
+  }
+  
+  .course-details p strong {
+    color: #2c387e;
+  }
+  

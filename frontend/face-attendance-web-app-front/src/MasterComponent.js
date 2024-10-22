@@ -13,38 +13,46 @@ function MasterComponent() {
 
   function register_new_user_ok(text) {
     if (lastFrame) {
-      const apiUrl = `${API_BASE_URL}/register_new_user`;
-      
-      fetch(lastFrame)
-        .then((response) => {
-          if (!response.ok) throw new Error('Failed to fetch image');
-          return response.blob();
-        })
-        .then((blob) => {
-          const file = new File([blob], "webcam-frame.png", { type: "image/png" });
-          const formData = new FormData();
-          formData.append("file", file);
-          formData.append("text", text);  // Append `text` as form data
-  
-          return axios.post(apiUrl, formData, {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          });
-        })
-        .then((response) => {
-          console.log(response.data);
-          if (response.data.registration_status === 200) {
-            alert("User was registered successfully!");
-          }
-        })
-        .catch((error) => {
-          console.error("Error sending image to API:", error);
-        });
+        const apiUrl = `${API_BASE_URL}/register_new_user`;
+
+        fetch(lastFrame)
+            .then((response) => {
+                if (!response.ok) throw new Error('Failed to fetch image');
+                return response.blob();
+            })
+            .then((blob) => {
+                const file = new File([blob], "webcam-frame.png", { type: "image/png" });
+                const formData = new FormData();
+                formData.append("file", file);
+                formData.append("text", text);  // Append `text` as form data
+
+                return axios.post(apiUrl, formData, {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    },
+                });
+            })
+            .then((response) => {
+                console.log(response.data);
+
+                // Check the registration status and show appropriate alerts
+                if (response.data.registration_status === 200) {
+                    alert("User was registered successfully!");
+                } else if (response.data.registration_status === 'Face already registered') {
+                    alert("This face is already registered. Please try a different one.");
+                } else {
+                    alert("An unknown error occurred. Please try again.");
+                }
+            })
+            .catch((error) => {
+                console.error("Error sending image to API:", error);
+                alert("An error occurred during registration. Please try again.");
+            });
     } else {
-      console.error("No frame available to send.");
+        console.error("No frame available to send.");
     }
-  }
+}
+
   
   
   async function downloadLogs() {

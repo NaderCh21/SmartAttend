@@ -1,18 +1,43 @@
-import React, { useState } from 'react';
+// DashboardLayout.js
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import './DashboardLayout.css';
 
-const DashboardLayout = ({ children }) => {
-  const [selectedCourse, setSelectedCourse] = useState(null); // To track the selected course
+const DashboardLayout = ({ children, teacherId }) => {
+  const [selectedCourse, setSelectedCourse] = useState(null);
+  const [courses, setCourses] = useState([]);
 
-  const handleCourseSelect = (courseName) => {
-    setSelectedCourse(courseName);
+  // Fetch courses for the specified teacher from the backend
+  const fetchCourses = async () => {
+    try {
+      const response = await axios.get(`http://localhost:8000/courses/teacher/${teacherId}`);
+      setCourses(response.data);
+    } catch (error) {
+      console.error("Error fetching courses:", error);
+    }
   };
 
-  const courseContent = {
-    os: "This is the Operating Systems course content.",
-    database: "This is the Database course content.",
-    'advance-db': "This is the Advanced Database course content.",
-    'web-dev': "This is the Web Development course content.",
+  useEffect(() => {
+    if (teacherId) {
+      fetchCourses();
+    }
+  }, [teacherId]);
+
+  const handleCourseSelect = (course) => {
+    setSelectedCourse(course);
+  };
+
+  // Handle course deletion
+  const handleDeleteCourse = async (courseId) => {
+    try {
+      await axios.delete(`http://localhost:8000/courses/${courseId}`);
+      setCourses(courses.filter((course) => course.id !== courseId));
+      if (selectedCourse && selectedCourse.id === courseId) {
+        setSelectedCourse(null); // Reset selected course if it's deleted
+      }
+    } catch (error) {
+      console.error("Error deleting course:", error);
+    }
   };
 
   return (
@@ -20,15 +45,16 @@ const DashboardLayout = ({ children }) => {
       <aside className="sidebar">
         <h3 className="sidebar-header">Teacher Section</h3>
         <nav className="sidebar-nav">
-          {/* Use onClick instead of NavLink to control the rendering */}
           <div className="nav-item" onClick={() => handleCourseSelect(null)}>Dashboard</div>
           <div className="nav-item dropdown">
             My Courses ▼
             <div className="dropdown-list">
-              <div className="nav-item" onClick={() => handleCourseSelect('os')}>OS</div>
-              <div className="nav-item" onClick={() => handleCourseSelect('database')}>Database</div>
-              <div className="nav-item" onClick={() => handleCourseSelect('advance-db')}>Advance DB</div>
-              <div className="nav-item" onClick={() => handleCourseSelect('web-dev')}>Web Dev</div>
+              {courses.map((course) => (
+                <div key={course.id} className="nav-item">
+                  <span onClick={() => handleCourseSelect(course)}>{course.name}</span>
+                  <button onClick={() => handleDeleteCourse(course.id)}>Delete</button>
+                </div>
+              ))}
             </div>
           </div>
         </nav>
@@ -37,12 +63,11 @@ const DashboardLayout = ({ children }) => {
         {selectedCourse ? (
           <div>
             <h2>Course Content</h2>
-            <p>{courseContent[selectedCourse]}</p>
+            <p>This is the content for {selectedCourse.name}.</p>
           </div>
         ) : (
           <div>
             <h2>Dashboard Overview</h2>
-            {/* Render the TeacherDashboard content here */}
             {children}
           </div>
         )}

@@ -1,443 +1,119 @@
 import React, { useRef, useEffect, useState } from "react";
 import axios from "axios";
 import API_BASE_URL from "./API";
+import "./MasterComponent.css"; // Add this line to import the new CSS file
 
-let videoRef;
-let canvasRef;
-let context;
-
-function MasterComponent() {
-  let [lastFrame, setLastFrame] = useState(null);
-  const [showWebcam, setShowWebcam] = useState(true);
-  const [showImg, setShowImg] = useState(false);
-
-  function register_new_user_ok(text) {
-    if (lastFrame) {
-        const apiUrl = `${API_BASE_URL}/register_new_user`;
-
-        fetch(lastFrame)
-            .then((response) => {
-                if (!response.ok) throw new Error('Failed to fetch image');
-                return response.blob();
-            })
-            .then((blob) => {
-                const file = new File([blob], "webcam-frame.png", { type: "image/png" });
-                const formData = new FormData();
-                formData.append("file", file);
-                formData.append("text", text);  // Append `text` as form data
-
-                return axios.post(apiUrl, formData, {
-                    headers: {
-                        "Content-Type": "multipart/form-data",
-                    },
-                });
-            })
-            .then((response) => {
-                console.log(response.data);
-
-                // Check the registration status and show appropriate alerts
-                if (response.data.registration_status === 200) {
-                    alert("User was registered successfully!");
-                } else if (response.data.registration_status === 'Face already registered') {
-                    alert("This face is already registered. Please try a different one.");
-                } else {
-                    alert("An unknown error occurred. Please try again.");
-                }
-            })
-            .catch((error) => {
-                console.error("Error sending image to API:", error);
-                alert("An error occurred during registration. Please try again.");
-            });
-    } else {
-        console.error("No frame available to send.");
-    }
-}
-
-  
-  
-  async function downloadLogs() {
-    const response = await axios.get(API_BASE_URL + "/get_attendance_logs", {
-      responseType: "blob",
-    });
-
-    const url = window.URL.createObjectURL(new Blob([response.data]));
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", "logs.zip");
-    document.body.appendChild(link);
-    link.click();
-  }
-
-  function send_img_login() {
-    if (videoRef.current && canvasRef.current) {
-      context = canvasRef.current.getContext("2d");
-      context.drawImage(videoRef.current, 0, 0, 400, 300);
-
-      canvasRef.current.toBlob((blob) => {
-        // setLastFrame(URL.createObjectURL(blob));
-
-        // Your edition here
-
-        const apiUrl = API_BASE_URL + "/login";
-        const file = new File([blob], "webcam-frame.png", {
-          type: "image/png",
-        });
-        const formData = new FormData();
-        formData.append("file", file);
-
-        axios
-          .post(apiUrl, formData, {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          })
-          .then((response) => {
-            console.log(response.data);
-            if (response.data.match_status == true) {
-              alert("Welcome back " + response.data.user + " !");
-            } else {
-              alert("Unknown user! Please try again or register new user!");
-            }
-          })
-          .catch((error) => {
-            console.error("Error sending image to API:", error);
-          });
-      });
-    }
-  }
-
-  function send_img_logout() {
-    if (videoRef.current && canvasRef.current) {
-      context = canvasRef.current.getContext("2d");
-      context.drawImage(videoRef.current, 0, 0, 400, 300);
-
-      canvasRef.current.toBlob((blob) => {
-        // setLastFrame(URL.createObjectURL(blob));
-
-        // Your edition here
-
-        const apiUrl = API_BASE_URL + "/logout";
-        const file = new File([blob], "webcam-frame.png", {
-          type: "image/png",
-        });
-        const formData = new FormData();
-        formData.append("file", file);
-
-        axios
-          .post(apiUrl, formData, {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          })
-          .then((response) => {
-            console.log(response.data);
-            if (response.data.match_status == true) {
-              alert("Goodbye " + response.data.user + " !");
-            } else {
-              alert("Unknown user! Please try again or register new user!");
-            }
-          })
-          .catch((error) => {
-            console.error("Error sending image to API:", error);
-          });
-      });
-    }
-  }
-  return (
-    <div className="master-component">
-      {showWebcam ? (
-        <Webcam lastFrame={lastFrame} setLastFrame={setLastFrame} />
-      ) : (
-        <img className="img" src={lastFrame} />
-      )}
-      <Buttons
-        lastFrame={lastFrame}
-        setLastFrame={setLastFrame}
-        setShowWebcam={setShowWebcam}
-        showWebcam={showWebcam}
-        setShowImg={setShowImg}
-        send_img_login={send_img_login}
-        send_img_logout={send_img_logout}
-        register_new_user_ok={register_new_user_ok}
-        downloadLogs={downloadLogs}
-      />
-    </div>
-  );
-}
-
-function saveLastFrame(
-  canvasRef,
-  lastFrame,
-  setLastFrame,
-  setShowWebcam,
-  showWebcam,
-  setShowImg
-) {
-  requestAnimationFrame(() => {
-    console.log(context);
-
-    if (!showWebcam && lastFrame) {
-      setShowImg(true);
-    } else {
-      setShowImg(false);
-    }
-
-    if (videoRef.current && canvasRef.current) {
-      context = canvasRef.current.getContext("2d");
-      context.drawImage(videoRef.current, 0, 0, 400, 300);
-
-      canvasRef.current.toBlob((blob) => {
-        setLastFrame(URL.createObjectURL(blob));
-        // lastFrame = blob.slice(); // Your edition here
-      });
-      setShowWebcam(false);
-      setShowImg(true);
-    }
-  }, [showWebcam]);
-}
-
-function Webcam({ lastFrame, setLastFrame }) {
-  videoRef = useRef(null);
-  canvasRef = useRef(null);
+function MasterComponent({ onFaceCapture, onLoginSuccess, onLogoutSuccess }) {
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
   const [isStreaming, setIsStreaming] = useState(false);
+  const [lastFrame, setLastFrame] = useState(null);
+  const [showPopup, setShowPopup] = useState(false);
 
+  // Set up the webcam stream
   useEffect(() => {
     const setupCamera = async () => {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      videoRef.current.srcObject = stream;
-      setIsStreaming(true);
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        videoRef.current.srcObject = stream;
+        setIsStreaming(true);
+      } catch (error) {
+        console.error("Error accessing the webcam: ", error);
+      }
     };
-    if (!isStreaming) {
+    if (!isStreaming && showPopup) {
       setupCamera();
     }
-  }, [isStreaming]);
+  }, [isStreaming, showPopup]);
 
-  useEffect(() => {
-    if (isStreaming) {
-      context = canvasRef.current.getContext("2d");
+  // Capture image from the webcam
+  const captureImage = () => {
+    if (videoRef.current && canvasRef.current) {
+      const context = canvasRef.current.getContext("2d");
       context.drawImage(videoRef.current, 0, 0, 400, 300);
-
-      requestAnimationFrame(() => {
-        setTimeout(() => {
-          context.drawImage(videoRef.current, 0, 0, 400, 300);
-
-          canvasRef.current.toBlob((blob) => {
-            setLastFrame(URL.createObjectURL(blob));
-            lastFrame = blob.slice(); // Your edition here
-          });
-        }, 33);
+      canvasRef.current.toBlob((blob) => {
+        setLastFrame(URL.createObjectURL(blob));
+        if (onFaceCapture) {
+          onFaceCapture(blob);
+        }
       });
+    } else {
+      console.error("Video or Canvas element is not available for face capture.");
     }
-  }, [isStreaming]);
+  };
 
+  const handleLogin = () => {
+    captureImage();
+    const apiUrl = `${API_BASE_URL}/login`;
+    sendImageToAPI(apiUrl, (response) => {
+      if (response.match_status) {
+        onLoginSuccess(response.user);
+      } else {
+        alert("Unknown user! Please try again or register.");
+      }
+    });
+  };
+
+  const handleLogout = () => {
+    captureImage();
+    const apiUrl = `${API_BASE_URL}/logout`;
+    sendImageToAPI(apiUrl, (response) => {
+      if (response.match_status) {
+        onLogoutSuccess(response.user);
+      } else {
+        alert("Unknown user! Please try again or register.");
+      }
+    });
+  };
+
+  const sendImageToAPI = (apiUrl, callback) => {
+    canvasRef.current.toBlob((blob) => {
+      const file = new File([blob], "webcam-frame.png", { type: "image/png" });
+      const formData = new FormData();
+      formData.append("file", file);
+
+      axios.post(apiUrl, formData, { headers: { "Content-Type": "multipart/form-data" } })
+        .then((response) => callback(response.data))
+        .catch((error) => console.error("Error sending image to API:", error));
+    });
+  };
+
+  return (
+    <div className="master-component">
+      <button onClick={() => setShowPopup(true)} className="open-popup-button">Open Camera</button>
+
+      {showPopup && (
+        <div className="popup">
+          <div className="popup-content">
+            <span className="close-popup" onClick={() => setShowPopup(false)}>&times;</span>
+            <Webcam videoRef={videoRef} canvasRef={canvasRef} />
+            <Buttons
+              handleLogin={handleLogin}
+              handleLogout={handleLogout}
+              captureImage={captureImage}
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Webcam({ videoRef, canvasRef }) {
   return (
     <div className="webcam">
-      <canvas ref={canvasRef} width={400} height={300} />
-      <video ref={videoRef} autoPlay playsInline />
+      <canvas ref={canvasRef} width={400} height={300} style={{ display: "none" }} />
+      <video ref={videoRef} autoPlay playsInline width={400} height={300} />
     </div>
   );
 }
 
-function Buttons({
-  lastFrame,
-  setLastFrame,
-  setShowWebcam,
-  showWebcam,
-  setShowImg,
-  send_img_login,
-  send_img_logout,
-  register_new_user_ok,
-  downloadLogs,
-}) {
-  const [isRegistering, setIsRegistering] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
-
-  const [zIndexAdmin, setZIndexAdmin] = useState(1);
-  const [zIndexRegistering, setZIndexRegistering] = useState(1);
-
-  const changeZIndexAdmin = (newZIndex) => {
-    setZIndexAdmin(newZIndex);
-  };
-
-  const changeZIndexRegistering = (newZIndex) => {
-    setZIndexRegistering(newZIndex);
-  };
-
-  const [value, setValue] = useState("");
-
-  const handleChange = (event) => {
-    setValue(event.target.value);
-  };
-
-  const resetTextBox = () => {
-    setValue("");
-  };
-
+function Buttons({ handleLogin, handleLogout, captureImage }) {
   return (
     <div className="buttons-container">
-      <div
-        className={`${
-          isRegistering ? "visible" : "hidden"
-        } register-text-container`}
-        style={{
-          zIndex: zIndexRegistering,
-        }}
-      >
-        <input
-          className="register-text"
-          type="text"
-          placeholder="Enter user name"
-          value={value}
-          onChange={handleChange}
-        />
-      </div>
-      <div
-        className="register-ok-container"
-        style={{
-          zIndex: zIndexRegistering,
-        }}
-      >
-        <button
-          className={`${
-            isRegistering ? "visible" : "hidden"
-          } register-ok-button`}
-          onClick={async () => {
-            setIsAdmin(false);
-            setIsRegistering(false);
-
-            changeZIndexAdmin(1);
-            changeZIndexRegistering(1);
-
-            setShowWebcam(true);
-            setShowImg(false);
-            register_new_user_ok(value);
-          }}
-        ></button>
-      </div>
-      <div
-        className="register-cancel-container"
-        style={{
-          zIndex: zIndexRegistering,
-        }}
-      >
-        <button
-          className={`${
-            isRegistering ? "visible" : "hidden"
-          } register-cancel-button`}
-          onClick={async () => {
-            setIsAdmin(false);
-            setIsRegistering(false);
-
-            changeZIndexAdmin(1);
-            changeZIndexRegistering(1);
-
-            setShowWebcam(true);
-            setShowImg(false);
-          }}
-        ></button>
-      </div>
-      <div className="login-container">
-        <button
-          className={`${
-            isAdmin || isRegistering ? "hidden" : "visible"
-          } login-button`}
-          onClick={async () => {
-            // saveFrameToDisk(canvasRef, lastFrame, setLastFrame);
-            // setIsRegistering(true);
-            send_img_login();
-          }}
-        ></button>
-      </div>
-      <div className="logout-container">
-        <button
-          className={`${
-            isAdmin || isRegistering ? "hidden" : "visible"
-          } logout-button`}
-          onClick={() => {
-            send_img_logout();
-          }}
-        ></button>
-      </div>
-      <div className="admin-container">
-        <button
-          className={`${
-            isAdmin || isRegistering ? "hidden" : "visible"
-          } admin-button`}
-          onClick={() => {
-            setIsAdmin(true);
-            setIsRegistering(false);
-
-            changeZIndexAdmin(3);
-            changeZIndexRegistering(1);
-          }}
-        ></button>
-      </div>
-      <div
-        className="register-container"
-        style={{
-          zIndex: zIndexAdmin,
-        }}
-      >
-        <button
-          className={`${isAdmin ? "visible" : "hidden"} register-button`}
-          onClick={() => {
-            setIsAdmin(false);
-            setIsRegistering(true);
-
-            changeZIndexAdmin(1);
-            changeZIndexRegistering(3);
-
-            saveLastFrame(
-              canvasRef,
-              lastFrame,
-              setLastFrame,
-              setShowWebcam,
-              showWebcam,
-              setShowImg
-            );
-            resetTextBox();
-
-          }}
-        ></button>
-      </div>
-      <div
-        className="goback-container"
-        style={{
-          zIndex: zIndexAdmin,
-        }}
-      >
-        <button
-          className={`${isAdmin ? "visible" : "hidden"} goback-button`}
-          onClick={() => {
-            setIsAdmin(false);
-            setIsRegistering(false);
-
-            changeZIndexAdmin(1);
-            changeZIndexRegistering(1);
-          }}
-        ></button>
-      </div>
-
-      <div
-        className="download-container"
-        style={{
-          zIndex: zIndexAdmin,
-        }}
-      >
-        <button
-          className={`${isAdmin ? "visible" : "hidden"} download-button`}
-          onClick={() => {
-            setIsAdmin(false);
-            setIsRegistering(false);
-
-            changeZIndexAdmin(1);
-            changeZIndexRegistering(1);
-
-            downloadLogs();
-          }}
-        ></button>
-      </div>
+      <button onClick={captureImage} className="styled-button">Register Face</button>
     </div>
   );
 }
+
 export default MasterComponent;

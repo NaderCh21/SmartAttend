@@ -1,21 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import DashboardLayout from './DashboardLayout';
 import './TeacherDashboard.css';
+import { useNavigate } from 'react-router-dom';
 
 const TeacherDashboard = () => {
-  const courses = [
-    { name: 'OS', percentage: 62.5 },
-    { name: 'Database', percentage: 33.33 },
-    { name: 'Advance DB', percentage: 0 },
-    { name: 'Web Dev', percentage: 0 },
-  ];
-
+  const navigate = useNavigate();
   const [formState, setFormState] = useState({
     name: '',
     year: '',
     semester: '',
   });
 
+  // Retrieve teacherId from localStorage
+  const teacherId = localStorage.getItem('teacherId');
+
+  useEffect(() => {
+    if (!teacherId) {
+      console.error("Teacher ID not found. Redirecting to login.");
+      navigate('/login');  // Redirect to login if teacherId is missing
+    }
+  }, [teacherId, navigate]);
+
+  // Handle form input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormState({
@@ -24,28 +31,29 @@ const TeacherDashboard = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  // Handle form submission to add a new course
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('New Course:', formState);
-    // Add your logic here to handle the form submission
+    try {
+      const response = await axios.post('http://localhost:8000/courses', {
+        ...formState,
+        teacher_id: parseInt(teacherId),  // Ensure teacherId is an integer
+      });
+      if (response.status === 201) {
+        setFormState({ name: '', year: '', semester: '' });
+        window.location.reload(); // Reload to refresh courses in the sidebar
+      }
+    } catch (error) {
+      console.error("Error adding course:", error);
+    }
   };
 
   return (
-    <DashboardLayout>
+    <DashboardLayout teacherId={teacherId}>
       <div className="attendance-overview">
         <h2>All classes attendance</h2>
         <div className="attendance-circles">
-          {courses.map((course) => (
-            <div className="attendance-item" key={course.name}>
-              <div
-                className="attendance-circle"
-                style={{ '--percent': course.percentage }}
-              >
-                {course.percentage.toFixed(2)}%
-              </div>
-              <p>{course.name}</p>
-            </div>
-          ))}
+          <p>Summary of attendance by course will go here.</p>
         </div>
       </div>
 

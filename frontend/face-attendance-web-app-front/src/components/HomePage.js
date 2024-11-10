@@ -3,8 +3,16 @@ import "./HomePage.css";
 import MainImage from '../assets/MainImage.png';
 import DigitalEyeIcon from '../assets/digital_eye_icon.png';
 import DigitalLockIcon from '../assets/digital_lock_icon.png';
+import { useNavigate } from "react-router-dom";
 
 const HomePage = () => {
+  const navigate = useNavigate();
+
+  const handleLoginClick = () => {
+    navigate("/login"); // This will take the user to the LoginApp component
+  };
+
+
   return (
     <div className="homepage">
       <header className="header">
@@ -21,7 +29,7 @@ const HomePage = () => {
           <p className="hero-subtitle">Log in to manage your attendance and access other features.</p>
           <div className="buttons">
             <button className="get-started-button">Get Started</button>
-            <button className="login-button">Log In as Admin</button>
+            <button className="login-button" onClick={handleLoginClick}>Log In/ SignUp</button>
           </div>
         </div>
       </div>

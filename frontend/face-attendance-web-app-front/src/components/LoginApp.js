@@ -17,6 +17,8 @@ import {
 } from "@material-ui/core";
 import { Alert } from "@material-ui/lab";
 import MasterComponent from "../MasterComponent"; // Import the face capture component
+import "./LoginApp.css";
+
 
 const LoginApp = () => {
   const navigate = useNavigate();
@@ -121,7 +123,8 @@ const LoginApp = () => {
             <Paper variant="elevation" elevation={2} className="login-background">
               <Grid container direction="row" spacing={4}>
                 {/* Sign In Section */}
-                <Grid item container direction="column" xs={6}>
+                <Grid item container direction="column" xs={6} className="login-section">
+
                   <Grid item>
                     <Typography component="h1" variant="h5">Sign in</Typography>
                   </Grid>
@@ -172,7 +175,8 @@ const LoginApp = () => {
                 </Grid>
 
                 {/* Create Account Section */}
-                <Grid item container direction="column" xs={6}>
+                <Grid item container direction="column" xs={6} className="signup-section">
+
                   <Typography component="h1" variant="h5">Create Account</Typography>
 
                   {/* Display signup feedback message */}
@@ -243,7 +247,8 @@ const LoginApp = () => {
                         />
                       </Grid>
                       <Grid item>
-                        <FormControl component="fieldset">
+                      <FormControl component="fieldset" className="role-selection">
+
                           <FormLabel component="legend">Role</FormLabel>
                           <RadioGroup
                             row

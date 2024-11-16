@@ -1,20 +1,185 @@
+/* General Styling */
+body {
+    background-color: #f4f6f8;
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
 /* LoginApp Styles */
 .login-form {
+    display: flex;
     justify-content: center;
+    align-items: center;
     min-height: 90vh;
+    padding: 2rem;
 }
 
 .login-background {
-    justify-content: center;
-    min-height: 30vh;
-    padding: 50px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 80%;
+    max-width: 900px;
+    padding: 2rem;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    gap: 2rem;
 }
 
+/* Typography */
+.MuiTypography-root {
+    text-align: center;
+    font-weight: 600;
+    color: #3f51b5;
+    margin-bottom: 1.5rem;
+    font-size: 1.4rem;
+}
+
+/* Input Fields */
+.MuiTextField-root {
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+.MuiOutlinedInput-root {
+    height: 40px;
+    font-size: 0.95rem;
+}
+
+.MuiOutlinedInput-root input {
+    padding: 10px;
+}
+
+.MuiFormControl-root {
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+/* Buttons */
 .button-block {
     width: 100%;
+    margin-top: 1rem;
+    background-color: #3f51b5;
+    color: white;
+    padding: 0.8rem;
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 5px;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+    border: none;
+}
+
+.button-block:hover {
+    background-color: #2c387e;
+    cursor: pointer;
+}
+
+/* Radio and Role Selection */
+.role-selection {
     margin-top: 1rem;
 }
 
 .MuiFormControlLabel-root {
     margin-right: 1rem;
+    color: #3f51b5;
+    font-size: 0.95rem;
+}
+
+.MuiRadio-root {
+    color: #3f51b5;
+}
+
+/* Divider for Sign In and Create Account */
+.MuiGrid-spacing-xs-4 {
+    border-right: 2px solid #f0f0f0;
+    padding-right: 2rem;
+}
+
+.MuiGrid-spacing-xs-4:last-child {
+    border-right: none;
+    padding-left: 2rem;
+}
+
+/* Link Styling */
+.MuiLink-root {
+    color: #3f51b5;
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.MuiLink-root:hover {
+    text-decoration: underline;
+}
+
+/* Alert Styling */
+.MuiAlert-root {
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+/* Styling for Sections */
+.login-section, .signup-section {
+    flex: 1;
+    padding: 1rem;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Grid Layout Adjustments */
+.MuiGrid-root {
+    padding: 0.5rem;
+}
+
+/* Focus Styles for Inputs */
+.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+    border-color: #3f51b5;
+}
+
+.MuiInputLabel-outlined.Mui-focused {
+    color: #3f51b5;
+}
+
+/* Degree, Year, and Stream Fields */
+.degree-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.degree-container .MuiTextField-root {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+/* Responsive Styling */
+@media (max-width: 768px) {
+    .login-background {
+        flex-direction: column;
+        padding: 1.5rem;
+    }
+
+    .MuiGrid-spacing-xs-4 {
+        border-right: none;
+        border-bottom: 2px solid #f0f0f0;
+        padding-bottom: 1.5rem;
+    }
+
+    .MuiTypography-root {
+        font-size: 1.2rem;
+    }
+
+    .login-section, .signup-section {
+        margin-right: 0;
+        margin-bottom: 1rem;
+    }
+
+    .degree-container {
+        flex-direction: column;
+    }
 }

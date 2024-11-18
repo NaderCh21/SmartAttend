@@ -5,6 +5,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHome, faBook, faUserGraduate } from '@fortawesome/free-solid-svg-icons';
 
 
+
+
+
 const DashboardLayout = ({ children, teacherId }) => {
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [courses, setCourses] = useState([]);
@@ -41,6 +44,27 @@ const DashboardLayout = ({ children, teacherId }) => {
     }
   };
 
+  const [teacherDetails, setTeacherDetails] = useState(null);
+
+  const fetchTeacherDetails = async () => {
+    try {
+      const id = teacherId || localStorage.getItem("teacherId");
+      const response = await axios.get(`http://localhost:8000/teachers/${id}`);
+      setTeacherDetails(response.data);
+    } catch (error) {
+      console.error("Error fetching teacher details:", error);
+    }
+  };
+  
+
+  useEffect(() => {
+    console.log("Teacher ID:", teacherId || localStorage.getItem("teacherId"));
+    if (teacherId || localStorage.getItem("teacherId")) {
+      fetchTeacherDetails();
+    }
+  }, [teacherId]);
+  
+
   return (
     <div className="dashboard-layout">
       {/* Sidebar */}
@@ -74,7 +98,9 @@ const DashboardLayout = ({ children, teacherId }) => {
     <input type="text" placeholder="Search for courses, students..." className="search-bar" />
   </div>
   <div className="teacher-info">
-    <span className="teacher-name"><strong>Teacher09</strong></span>
+  <span className="teacher-name">
+    <strong>{teacherDetails ? `${teacherDetails.first_name} ${teacherDetails.last_name}` : "Loading..."}</strong>
+  </span>
     <div className="teacher-actions">
       {/*to be changed later */}
       <img

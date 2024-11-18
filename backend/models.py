@@ -21,7 +21,7 @@ class Student(Base):
     degree = Column(String)
     year = Column(Integer)
     stream = Column(String)
-    face_data = Column(LargeBinary)
+    face_data = Column(Text, nullable=True)
     user = relationship("User", back_populates="student")
     registrations = relationship("Registration", back_populates="student")
     attendance_logs = relationship("AttendanceLog", back_populates="student")

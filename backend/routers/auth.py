@@ -5,6 +5,7 @@ from models import User, Student, Teacher
 from schemas import RegisterUser, LoginUser
 from database import SessionLocal, get_db
 from utils import hash_password, verify_password
+from utils import encode_face
 
 router = APIRouter()
 
@@ -15,8 +16,9 @@ def get_db():
     finally:
         db.close()
 
+
 @router.post("/signup")
-def register_user(user: RegisterUser, db: Session = Depends(get_db)):
+def register_user(user: RegisterUser, db: Session = Depends(get_db), face_data: str = None):
     if user.password != user.confirm_password:
         raise HTTPException(status_code=400, detail="Passwords do not match")
     
@@ -45,9 +47,19 @@ def register_user(user: RegisterUser, db: Session = Depends(get_db)):
             roll=user.roll,
             degree=user.degree,
             year=user.year,
-            stream=user.stream
+            stream=user.stream,
         )
+
+        # Only add face_data if provided
+        if face_data:
+            face_encoding = encode_face(face_data)  # Generate face encoding
+            student.face_data = face_encoding.tobytes()
+
         db.add(student)
+        db.commit()
+        db.refresh(student)  # Refresh to get the student_id
+        return {"message": "User registered successfully", "student_id": student.id}
+
     elif user.role == "teacher":
         teacher = Teacher(
             user_id=new_user.id,
@@ -59,6 +71,7 @@ def register_user(user: RegisterUser, db: Session = Depends(get_db)):
     db.commit()
     return {"message": "User registered successfully"}
 
+
 @router.post("/login")
 def login_user(user: LoginUser, db: Session = Depends(get_db)):
     db_user = db.query(User).filter(User.email == user.email).first()
@@ -69,4 +82,19 @@ def login_user(user: LoginUser, db: Session = Depends(get_db)):
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    return {"message": "Login successful", "user_id": db_user.id, "role": db_user.role}
+    # Initialize teacher_id as None
+    teacher_id = None
+
+    # Check if the user is a teacher and retrieve teacher_id
+    if db_user.role == "teacher":
+        teacher = db.query(Teacher).filter(Teacher.user_id == db_user.id).first()
+        if teacher:
+            teacher_id = teacher.id
+
+    return {
+        "message": "Login successful",
+        "user_id": db_user.id,
+        "role": db_user.role,
+        "teacher_id": teacher_id,  # Add teacher_id to the response
+    }
+

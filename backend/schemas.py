@@ -58,3 +58,15 @@ class RegistrationResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class TeacherResponse(BaseModel):
+    id: int
+    first_name: str
+    last_name: str
+    email: str
+    department: str
+    subject: str
+
+    class Config:
+        from_attributes = True

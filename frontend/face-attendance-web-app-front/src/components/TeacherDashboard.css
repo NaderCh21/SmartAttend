@@ -105,3 +105,40 @@
 .add-course-button:hover {
   background: #2c387e;
 }
+
+
+.camera-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.camera-container {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  width: 80%;
+  max-width: 640px;
+  text-align: center;
+}
+
+button {
+  margin: 10px;
+  padding: 10px 20px;
+  border: none;
+  background-color: #3f51b5;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #303f9f;
+}

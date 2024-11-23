@@ -54,6 +54,7 @@ class Course(Base):
     
     teacher = relationship("Teacher", back_populates="courses")
     registrations = relationship("Registration", back_populates="course")
+    sessions = relationship("Sessions", back_populates="course")
     attendance_logs = relationship("AttendanceLog", back_populates="course", cascade="all, delete-orphan")
 
 from sqlalchemy import Column, Integer, ForeignKey, Date, String, Time
@@ -65,10 +66,21 @@ class AttendanceLog(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     student_id = Column(Integer, ForeignKey("students.id"), nullable=False)
-    course_id = Column(Integer, ForeignKey("courses.id"), nullable=False)
-    date = Column(Date, nullable=False)  # Ensure this line exists
+    session_id = Column(Integer, ForeignKey("sessions.id"), nullable=False)
     status = Column(String, nullable=True)
     check_in = Column(Time, nullable=True )
     check_out = Column(Time, nullable=True)
     student = relationship("Student", back_populates="attendance_logs")
-    course = relationship("Course", back_populates="attendance_logs")
+    session = relationship("Sessions", back_populates="attendance_logs")
+
+class Sessions(Base): 
+    __tablename__ = "sessions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    course_id = Column(Integer, ForeignKey("courses.id"), nullable=False)
+    date = Column(Date, nullable=False)  # Date of the session
+    #start_time = Column(Time, nullable=False)  # Start time of the session
+    #end_time = Column(Time, nullable=False)  # End time of the session
+  
+    attendance_logs = relationship("AttendanceLog", back_populates="session", cascade="all, delete-orphan")
+    course = relationship("Course", back_populates="sessions")  # Relationship with Course

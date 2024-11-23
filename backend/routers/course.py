@@ -1,7 +1,7 @@
 # routers/course.py
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from models import Course, Registration, AttendanceLog, Student
+from models import Course, Registration, AttendanceLog, Student, Sessions
 from schemas import CourseCreate, CourseResponse, RecordAttendance, AttendanceResponse, RegistrationCreate, RegistrationResponse
 from database import get_db
 from typing import List
@@ -62,7 +62,7 @@ def delete_course(course_id: int, db: Session = Depends(get_db)):
     
     return {"message": "Course deleted successfully"}
 
-# Endpoint for students to record attendance for a specific course
+# Endpoint for students to record attendance for a specific course (not used)
 @router.post("/students/{student_id}/courses/{course_id}/attendance", response_model=AttendanceResponse)
 def record_attendance(student_id: int, course_id: int, db: Session = Depends(get_db)):
     # Check if the student is registered for the course
@@ -90,6 +90,11 @@ def record_attendance(student_id: int, course_id: int, db: Session = Depends(get
 #Endpoint for teacher to create a new session and record initial attendance as absent
 @router.post("/teacher/newSession/{course_id}",status_code=status.HTTP_204_NO_CONTENT)
 def new_session(course_id: int, db: Session = Depends(get_db)):
+    
+    create_session= Sessions(course_id = course_id, date = date.today())
+    db.add(create_session)
+    db.commit()
+    db.refresh(create_session)
 
     registered_students = db.query(Registration.student_id).filter(Registration.course_id == course_id).all()
     if not registered_students:
@@ -97,7 +102,7 @@ def new_session(course_id: int, db: Session = Depends(get_db)):
 
     student_ids = [student_id[0] for student_id in registered_students]
     attendance_records = [
-        AttendanceLog(student_id=student_id, course_id=course_id, status="Absent", date = date.today())
+        AttendanceLog(student_id=student_id, session_id=create_session.id, status="Absent")
         for student_id in student_ids
     ]
     db.bulk_save_objects(attendance_records)
@@ -109,7 +114,7 @@ def new_session(course_id: int, db: Session = Depends(get_db)):
 #Endpoint for teacher to record check-in attendance
 @router.post("/teacher/record_attendance/check-in", status_code=status.HTTP_204_NO_CONTENT)
 def record_attendance(record: RecordAttendance, db: Session = Depends(get_db)):
-    attendance_record = db.query(AttendanceLog).filter(AttendanceLog.student_id == record.student_id,AttendanceLog.course_id == record.course_id, AttendanceLog.date == record.date ).first()
+    attendance_record = db.query(AttendanceLog).filter(AttendanceLog.student_id == record.student_id,AttendanceLog.session_id == record.session_id).first()
     if not attendance_record:
         raise HTTPException(
             status_code=404, 
@@ -124,7 +129,7 @@ def record_attendance(record: RecordAttendance, db: Session = Depends(get_db)):
 #Endpoint for teacher to record check-out attendance
 @router.post("/teacher/record_attendance/check-out", status_code=status.HTTP_204_NO_CONTENT)
 def record_attendance(record: RecordAttendance, db: Session = Depends(get_db)):
-    attendance_record = db.query(AttendanceLog).filter(AttendanceLog.student_id == record.student_id,AttendanceLog.course_id == record.course_id, AttendanceLog.date == record.date ).first()
+    attendance_record = db.query(AttendanceLog).filter(AttendanceLog.student_id == record.student_id,AttendanceLog.session_id == record.session_id).first()
     if not attendance_record:
         raise HTTPException(
             status_code=404, 

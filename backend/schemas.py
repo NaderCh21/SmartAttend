@@ -35,8 +35,8 @@ class CourseResponse(BaseModel):
 
 class RecordAttendance(BaseModel):
     student_id: int
-    course_id: int
-    date: date
+    session_id: int
+    
 
 class AttendanceResponse(BaseModel):
     id: int

@@ -189,15 +189,133 @@
 import React, { useState } from "react";
 import FaceRecognition from "./FaceRecognition";
 import DashboardLayout from "./DashboardLayout";
+import axios from "axios";
 
 const TeacherDashboard = () => {
   const [isFaceRecognitionOpen, setIsFaceRecognitionOpen] = useState(false);
   const [recognitionResult, setRecognitionResult] = useState("");
+  const [isCourseFormOpen, setIsCourseFormOpen] = useState(false);
+  const [courseDetails, setCourseDetails] = useState({
+    name: "",
+    semester: "",
+    year: "",
+    teacher_id: ""
+  });
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setCourseDetails((prevDetails) => ({ ...prevDetails, [name]: value }));
+  };
+
+  const handleCreateCourse = async () => {
+    const teacherId = localStorage.getItem("teacherId"); // Retrieve teacher_id
+    if (!teacherId) {
+      alert("Teacher ID not found. Please log in again.");
+      return;
+    }
+    const courseData = {
+      ...courseDetails,
+      teacher_id: teacherId, // Ensure teacherID is included
+  };
+    try {
+     
+      const response = await axios.post("http://localhost:8000/courses", courseData);
+      const { name  } = response.data;
+      
+      alert(`Course "${name}" created successfully!`);
+      setCourseDetails({ name: "", semester: "", year: "", teacher_id:"" });
+      setIsCourseFormOpen(false);
+    } catch (error) {
+      console.error("Error creating course:", error);
+      alert("Failed to create course. Please try again.");
+    }
+  };
 
   return (
     <DashboardLayout>
       <div className="dashboard-container">
         <h2>Teacher Dashboard</h2>
+
+        {/* Create Course Section */}
+        <div className="create-course">
+          <h3>Create Course</h3>
+          <button
+            onClick={() => setIsCourseFormOpen((prev) => !prev)}
+            style={{
+              padding: "10px 20px",
+              backgroundColor: "#3f51b5",
+              color: "#fff",
+              border: "none",
+              cursor: "pointer",
+              borderRadius: "5px",
+              marginBottom: "10px",
+            }}
+          >
+            {isCourseFormOpen ? "Close Form" : "Create New Course"}
+          </button>
+
+          {isCourseFormOpen && (
+            <div
+              className="course-form"
+              style={{
+                marginTop: "10px",
+                padding: "10px",
+                border: "1px solid #ddd",
+                borderRadius: "5px",
+              }}
+            >
+              <div style={{ marginBottom: "10px" }}>
+                <label>
+                  Course Name:
+                  <input
+                    type="text"
+                    name="name"
+                    value={courseDetails.name}
+                    onChange={handleInputChange}
+                    style={{ marginLeft: "10px", padding: "5px" }}
+                  />
+                </label>
+              </div>
+              <div style={{ marginBottom: "10px" }}>
+                <label>
+                  Semester:
+                  <input
+                    type="text"
+                    name="semester"
+                    value={courseDetails.semester}
+                    onChange={handleInputChange}
+                    style={{ marginLeft: "10px", padding: "5px" }}
+                  />
+                </label>
+              </div>
+              <div style={{ marginBottom: "10px" }}>
+                <label>
+                  Year:
+                  <input
+                    type="number"
+                    name="year"
+                    value={courseDetails.year}
+                    onChange={handleInputChange}
+                    style={{ marginLeft: "10px", padding: "5px" }}
+                  />
+                </label>
+              </div>
+              <button
+                onClick={handleCreateCourse}
+                style={{
+                  padding: "10px 20px",
+                  backgroundColor: "#4caf50",
+                  color: "#fff",
+                  border: "none",
+                  cursor: "pointer",
+                  borderRadius: "5px",
+                }}
+              >
+                Create
+              </button>
+            </div>
+          )}
+        </div>
 
         {/* Face Recognition Section */}
         <div className="face-recognition-section">

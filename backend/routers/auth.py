@@ -83,18 +83,21 @@ def login_user(user: LoginUser, db: Session = Depends(get_db)):
         )
 
     # Initialize teacher_id as None
-    teacher_id = None
+    id = None
 
     # Check if the user is a teacher and retrieve teacher_id
     if db_user.role == "teacher":
         teacher = db.query(Teacher).filter(Teacher.user_id == db_user.id).first()
         if teacher:
-            teacher_id = teacher.id
-
+            id = teacher.id
+    elif db_user.role == "student":
+        student = db.query(Student).filter(Student.user_id == db_user.id).first()
+        if student:
+            id = student.id
     return {
         "message": "Login successful",
         "user_id": db_user.id,
         "role": db_user.role,
-        "teacher_id": teacher_id,  # Add teacher_id to the response
+        "relative_id": id,  # Add teacher_id to the response
     }
 

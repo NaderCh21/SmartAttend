@@ -33,9 +33,10 @@ class CourseResponse(BaseModel):
     class Config:
         from_attributes = True
 
-class AttendanceCreate(BaseModel):
+class RecordAttendance(BaseModel):
     student_id: int
     course_id: int
+    date: date
 
 class AttendanceResponse(BaseModel):
     id: int

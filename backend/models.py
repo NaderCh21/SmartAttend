@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Enum, ForeignKey, Date , LargeBinary
+from sqlalchemy import Column, Integer, String, Enum, ForeignKey, Date , LargeBinary, Text
 from sqlalchemy.orm import relationship
 from database import Base
 
@@ -56,7 +56,7 @@ class Course(Base):
     registrations = relationship("Registration", back_populates="course")
     attendance_logs = relationship("AttendanceLog", back_populates="course", cascade="all, delete-orphan")
 
-from sqlalchemy import Column, Integer, ForeignKey, Date, String
+from sqlalchemy import Column, Integer, ForeignKey, Date, String, Time
 from sqlalchemy.orm import relationship
 from database import Base
 
@@ -67,7 +67,8 @@ class AttendanceLog(Base):
     student_id = Column(Integer, ForeignKey("students.id"), nullable=False)
     course_id = Column(Integer, ForeignKey("courses.id"), nullable=False)
     date = Column(Date, nullable=False)  # Ensure this line exists
-    status = Column(String, nullable=False)
-
+    status = Column(String, nullable=True)
+    check_in = Column(Time, nullable=True )
+    check_out = Column(Time, nullable=True)
     student = relationship("Student", back_populates="attendance_logs")
     course = relationship("Course", back_populates="attendance_logs")

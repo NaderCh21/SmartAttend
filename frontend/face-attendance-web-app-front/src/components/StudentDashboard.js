@@ -34,13 +34,16 @@ const StudentDashboard = () => {
 
   // Function to handle course registration
   const handleCourseRegistration = async (courseId) => {
+    const studentID = localStorage.getItem("studentId") || studentId;
+    const registerDetails = {student_id : studentID,course_id :courseId }
     try {
-      await axios.post(`http://localhost:8000/students/${studentId}/courses`, {
-        course_id: courseId,
-      });
+      const response = await axios.post(`http://localhost:8000/courses/students/registercourse`,registerDetails );
+      const {id, student_id, course_id}= response.data;
+      alert(`Course "${course_id}" registered successfully!`);
+
       // Re-fetch registered courses to update the UI after registration
-      const response = await axios.get(`http://localhost:8000/students/${studentId}/courses`);
-      setRegisteredCourses(response.data);
+      // const response = await axios.get(`http://localhost:8000/students/${studentId}/courses`);
+    // setRegisteredCourses(response.data);
     } catch (error) {
       console.error('Error registering for course:', error);
     }

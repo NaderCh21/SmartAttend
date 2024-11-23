@@ -11,22 +11,24 @@ import { faHome, faBook, faUserGraduate } from '@fortawesome/free-solid-svg-icon
 const DashboardLayout = ({ children, teacherId }) => {
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [courses, setCourses] = useState([]);
-
+  const id = teacherId || localStorage.getItem("teacherId");
   // Fetch courses for the specified teacher from the backend
   const fetchCourses = async () => {
     try {
-      const response = await axios.get(`http://localhost:8000/courses/teacher/${teacherId}`);
+      
+      const response = await axios.get(`http://localhost:8000/courses/teacher/${id}`);
       setCourses(response.data);
+      console.log("Courses fetched:", response.data);
     } catch (error) {
       console.error("Error fetching courses:", error);
     }
   };
 
   useEffect(() => {
-    if (teacherId) {
+    if (id) {
       fetchCourses();
     }
-  }, [teacherId]);
+  }, [id]);
 
   const handleCourseSelect = (course) => {
     setSelectedCourse(course);
@@ -48,7 +50,7 @@ const DashboardLayout = ({ children, teacherId }) => {
 
   const fetchTeacherDetails = async () => {
     try {
-      const id = teacherId || localStorage.getItem("teacherId");
+      
       const response = await axios.get(`http://localhost:8000/teachers/${id}`);
       setTeacherDetails(response.data);
     } catch (error) {
@@ -58,11 +60,11 @@ const DashboardLayout = ({ children, teacherId }) => {
   
 
   useEffect(() => {
-    console.log("Teacher ID:", teacherId || localStorage.getItem("teacherId"));
-    if (teacherId || localStorage.getItem("teacherId")) {
+    
+    if (id) {
       fetchTeacherDetails();
     }
-  }, [teacherId]);
+  }, [id]);
   
 
   return (

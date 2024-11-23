@@ -7,6 +7,7 @@ import base64
 from sqlalchemy.orm import Session
 from database import get_db
 from models import Student
+import numpy as np
 
 router = APIRouter()
 
@@ -39,7 +40,7 @@ async def recognize_face(face_data: FaceMatchData, db: Session = Depends(get_db)
         for student in students:
             try:
                 # Deserialize stored face data from JSON
-                known_encoding = json.loads(student.face_data)
+                known_encoding = np.frombuffer(student.face_data)
                 match = face_recognition.compare_faces([known_encoding], captured_encoding)[0]
                 if match:
                     return {

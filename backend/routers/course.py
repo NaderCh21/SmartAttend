@@ -2,10 +2,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from models import Course, Registration, AttendanceLog, Student
-from schemas import CourseCreate, CourseResponse, AttendanceCreate, AttendanceResponse, RegistrationCreate, RegistrationResponse
+from schemas import CourseCreate, CourseResponse, RecordAttendance, AttendanceResponse, RegistrationCreate, RegistrationResponse
 from database import get_db
 from typing import List
-from datetime import date
+from datetime import date, datetime
 
 router = APIRouter()
 
@@ -27,6 +27,15 @@ def get_registered_courses_for_student(student_id: int, db: Session = Depends(ge
     course_ids = [registration.course_id for registration in registrations]
     return db.query(Course).filter(Course.id.in_(course_ids)).all()
 
+#Endpoint to register a course
+@router.post("/students/registercourse", response_model=RegistrationResponse)
+def register_course_for_student ( register:RegistrationCreate,db: Session = Depends(get_db)):
+    new_registration = Registration(**register.dict())
+    db.add(new_registration)
+    db.commit()
+    db.refresh(new_registration)
+
+    return new_registration
 # Endpoint to create a new course
 @router.post("/", response_model=CourseResponse)
 def create_course(course: CourseCreate, db: Session = Depends(get_db)):
@@ -76,3 +85,54 @@ def record_attendance(student_id: int, course_id: int, db: Session = Depends(get
     db.commit()
     db.refresh(attendance)
     return attendance
+
+
+#Endpoint for teacher to create a new session and record initial attendance as absent
+@router.post("/teacher/newSession/{course_id}",status_code=status.HTTP_204_NO_CONTENT)
+def new_session(course_id: int, db: Session = Depends(get_db)):
+
+    registered_students = db.query(Registration.student_id).filter(Registration.course_id == course_id).all()
+    if not registered_students:
+        raise HTTPException(status_code=400, detail="No Students Registered for this course")
+
+    student_ids = [student_id[0] for student_id in registered_students]
+    attendance_records = [
+        AttendanceLog(student_id=student_id, course_id=course_id, status="Absent", date = date.today())
+        for student_id in student_ids
+    ]
+    db.bulk_save_objects(attendance_records)
+    db.commit()
+    db.refresh()
+    return {"message": "Session Initiated successfully"}
+
+
+#Endpoint for teacher to record check-in attendance
+@router.post("/teacher/record_attendance/check-in", status_code=status.HTTP_204_NO_CONTENT)
+def record_attendance(record: RecordAttendance, db: Session = Depends(get_db)):
+    attendance_record = db.query(AttendanceLog).filter(AttendanceLog.student_id == record.student_id,AttendanceLog.course_id == record.course_id, AttendanceLog.date == record.date ).first()
+    if not attendance_record:
+        raise HTTPException(
+            status_code=404, 
+            detail="Student not registered in class"
+        )
+    attendance_record.status = "Present"
+    attendance_record.check_in = datetime.now().time()
+    db.commit()
+    db.refresh(attendance_record)
+    return {"message": "Checked-in successfully"}
+
+#Endpoint for teacher to record check-out attendance
+@router.post("/teacher/record_attendance/check-out", status_code=status.HTTP_204_NO_CONTENT)
+def record_attendance(record: RecordAttendance, db: Session = Depends(get_db)):
+    attendance_record = db.query(AttendanceLog).filter(AttendanceLog.student_id == record.student_id,AttendanceLog.course_id == record.course_id, AttendanceLog.date == record.date ).first()
+    if not attendance_record:
+        raise HTTPException(
+            status_code=404, 
+            detail="Student not registered in class"
+        )
+    attendance_record.status = "Early Leave"
+    attendance_record.check_out = datetime.now().time()
+    db.commit()
+    db.refresh(attendance_record)
+    return {"message": "Checked-out successfully"}
+

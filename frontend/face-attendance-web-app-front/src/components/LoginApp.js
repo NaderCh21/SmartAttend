@@ -54,12 +54,13 @@ const LoginApp = () => {
     e.preventDefault();
     try {
       const response = await axios.post("http://localhost:8000/login", loginData);
-      const { user_id, role, teacher_id } = response.data;
+      const { user_id, role, relative_id } = response.data;
 
       if (role === "teacher") {
-        localStorage.setItem("teacherId", teacher_id);
+        localStorage.setItem("teacherId", relative_id);
         navigate("/teacher/dashboard");
       } else if (role === "student") {
+        localStorage.setItem("studentId", relative_id )
         navigate("/student/dashboard");
       }
     } catch (error) {

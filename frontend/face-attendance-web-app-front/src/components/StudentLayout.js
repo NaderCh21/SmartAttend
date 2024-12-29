@@ -5,20 +5,18 @@ import './StudentLayout.css';
 
 const StudentLayout = ({ children }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [registeredCourses, setRegisteredCourses] = useState([]); // State for registered courses
-  const studentId = 1; // Replace with dynamic student ID if needed
+  const [registeredCourses, setRegisteredCourses] = useState([]);
+  const studentId = 1;
 
-  // Toggle the dropdown for the "My Courses" section
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
 
-  // Fetch the registered courses for the student
   useEffect(() => {
     const fetchRegisteredCourses = async () => {
       try {
         const response = await axios.get(`http://localhost:8000/students/${studentId}/courses`);
-        setRegisteredCourses(response.data); // Set the registered courses in state
+        setRegisteredCourses(response.data);
       } catch (error) {
         console.error('Error fetching registered courses:', error);
       }
@@ -38,7 +36,6 @@ const StudentLayout = ({ children }) => {
           </div>
           {isDropdownOpen && (
             <div className="dropdown-list">
-              {/* Render each registered course as a NavLink */}
               {registeredCourses.map((course) => (
                 <NavLink
                   key={course.id}

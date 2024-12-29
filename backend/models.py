@@ -54,8 +54,8 @@ class Course(Base):
     
     teacher = relationship("Teacher", back_populates="courses")
     registrations = relationship("Registration", back_populates="course")
-    sessions = relationship("Sessions", back_populates="course")
-    attendance_logs = relationship("AttendanceLog", back_populates="course", cascade="all, delete-orphan")
+    sessions = relationship("Sessions", back_populates="course")  # Relationship with Sessions
+
 
 from sqlalchemy import Column, Integer, ForeignKey, Date, String, Time
 from sqlalchemy.orm import relationship

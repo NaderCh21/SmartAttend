@@ -2,13 +2,16 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import StudentLayout from './StudentLayout';
 import './StudentDashboard.css';
+import CourseCard from './CourseCard';
+import AttendanceCircle from './AttendanceCircle';
+import SectionHeader from './SectionHeader';
+import { FaBook, FaCheckCircle } from 'react-icons/fa';
 
 const StudentDashboard = () => {
-  const [availableCourses, setAvailableCourses] = useState([]); // State for all available courses
-  const [registeredCourses, setRegisteredCourses] = useState([]); // State for student's registered courses
-  const studentId = 1; // Replace with dynamic student ID if needed
+  const [availableCourses, setAvailableCourses] = useState([]);
+  const [registeredCourses, setRegisteredCourses] = useState([]);
+  const studentId = 1;
 
-  // Fetch all available courses and registered courses on component mount
   useEffect(() => {
     const fetchAvailableCourses = async () => {
       try {
@@ -32,18 +35,12 @@ const StudentDashboard = () => {
     fetchRegisteredCourses();
   }, [studentId]);
 
-  // Function to handle course registration
   const handleCourseRegistration = async (courseId) => {
-    const studentID = localStorage.getItem("studentId") || studentId;
-    const registerDetails = {student_id : studentID,course_id :courseId }
+    const studentID = localStorage.getItem('studentId') || studentId;
+    const registerDetails = { student_id: studentID, course_id: courseId };
     try {
-      const response = await axios.post(`http://localhost:8000/courses/students/registercourse`,registerDetails );
-      const {id, student_id, course_id}= response.data;
-      alert(`Course "${course_id}" registered successfully!`);
-
-      // Re-fetch registered courses to update the UI after registration
-      // const response = await axios.get(`http://localhost:8000/students/${studentId}/courses`);
-    // setRegisteredCourses(response.data);
+      const response = await axios.post(`http://localhost:8000/courses/students/registercourse`, registerDetails);
+      alert(`Course "${response.data.course_id}" registered successfully!`);
     } catch (error) {
       console.error('Error registering for course:', error);
     }
@@ -52,31 +49,22 @@ const StudentDashboard = () => {
   return (
     <StudentLayout>
       <div className="student-dashboard">
-        <h2>Your Registered Courses</h2>
+        <SectionHeader title="Your Registered Courses" icon={<FaCheckCircle />} />
         <div className="attendance-circles">
           {registeredCourses.map((course) => (
-            <div className="attendance-item" key={course.id}>
-              <div className="attendance-circle">
-                {/* Assuming attendance percentage is part of the response */}
-                {course.percentage ? `${course.percentage}%` : 'N/A'}
-              </div>
-              <p>{course.name}</p>
-            </div>
+            <AttendanceCircle key={course.id} percentage={course.percentage} name={course.name} />
           ))}
         </div>
 
-        <h2>All Available Courses</h2>
+        <SectionHeader title="All Available Courses" icon={<FaBook />} />
         <div className="course-list">
           {availableCourses.map((course) => (
-            <div className="course-item" key={course.id}>
-              <p>{course.name}</p>
-              {/* Show register button if course is not in the registered courses */}
-              {!registeredCourses.find((regCourse) => regCourse.id === course.id) && (
-                <button onClick={() => handleCourseRegistration(course.id)}>
-                  Register
-                </button>
-              )}
-            </div>
+            <CourseCard
+              key={course.id}
+              course={course}
+              isRegistered={!!registeredCourses.find((regCourse) => regCourse.id === course.id)}
+              onRegister={handleCourseRegistration}
+            />
           ))}
         </div>
       </div>

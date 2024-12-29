@@ -1,0 +1,27 @@
+.attendance-item {
+    text-align: center;
+    color: #ffffff;
+  }
+  
+  .attendance-circle {
+    width: 120px;
+    height: 120px;
+    background: conic-gradient(#3f51b5 65%, #ddd 0%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #ffffff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    margin: 0 auto;
+  }
+  
+  .attendance-item p {
+    margin-top: 10px;
+    font-size: 1rem;
+    font-weight: bold;
+    color: #ffffff;
+  }
+  

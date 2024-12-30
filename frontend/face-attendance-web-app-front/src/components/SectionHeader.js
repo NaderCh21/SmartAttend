@@ -1,5 +1,5 @@
 import React from 'react';
-import './SectionHeader.css';
+import '../style/SectionHeader.css';
 
 const SectionHeader = ({ title, icon }) => (
   <div className="section-header">

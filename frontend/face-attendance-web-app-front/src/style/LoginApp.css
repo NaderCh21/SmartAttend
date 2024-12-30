@@ -1,12 +1,13 @@
 /* General Styling */
 body {
-    background-color: #f4f6f8;
+    background: linear-gradient(135deg, #3f51b5, #2196f3);
     font-family: 'Roboto', sans-serif;
     margin: 0;
     padding: 0;
+
 }
 
-
+/* Modal Styles */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -18,105 +19,77 @@ body {
     justify-content: center;
     align-items: center;
     z-index: 1000;
-  }
-  
-  .modal-content {
+}
+
+.modal-content {
     background-color: white;
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     width: 400px;
     text-align: center;
-  }
-  
-  .face-capture-modal {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    z-index: 1000;
-  }
-  
-  .face-capture-modal video {
-    display: block;
-    margin: 0 auto 20px;
-  }
-  
-  .face-capture-modal button {
-    margin: 10px;
-    padding: 10px 20px;
-    background: #007bff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  
-  .face-capture-modal button:hover {
-    background: #0056b3;
-  }
-  
-  .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 999;
-  }
-  
+}
 
 /* LoginApp Styles */
 .login-form {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 90vh;
+    min-height: 90vh; /* Viewport height */
     padding: 2rem;
 }
 
+/* Separate the two forms */
 .login-background {
     display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: flex-start;
-    width: 80%;
-    max-width: 900px;
+    flex-direction: column; /* Stack the forms vertically */
+    align-items: center; /* Center them horizontally */
+    gap: 3rem; /* Add spacing between the forms */
+    width: 90%; /* Adjust the overall width */
+    max-width: 700px; /* Limit max width */
     padding: 2rem;
     background-color: #ffffff;
     border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    gap: 2rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
-
 /* Typography */
 .MuiTypography-root {
     text-align: center;
-    font-weight: 600;
-    color: #3f51b5;
+    font-weight: 900; /* Make the text bolder */
+    color: #1a237e; /* Slightly darker blue for better contrast */
     margin-bottom: 1.5rem;
-    font-size: 1.4rem;
+    font-size: 1.6rem; /* Increase font size for better visibility */
+
+    letter-spacing: 1px; /* Optional: add some spacing for a cleaner look */
 }
+
+
 
 /* Input Fields */
 .MuiTextField-root {
+    border: solid 0.2px #ffffff !important;
+
     width: 100%;
-    margin-bottom: 1rem;
+    max-width: 350px; /* Limit field width */
+    margin-bottom: 10px !important;
 }
 
+
+
 .MuiOutlinedInput-root {
+    border: 1px solid #cfd8dc !important; /* Light gray for borders */
+    border-radius: 6px !important; /* Rounded corners */
     height: 40px;
     font-size: 0.95rem;
 }
 
 .MuiOutlinedInput-root input {
-    padding: 10px;
+    padding: 10px 12px; /* Increase horizontal padding */
+    text-align: left; /* Align text to the left */
+    font-size: 1rem; /* Make the text slightly larger */
 }
+
+
 
 .MuiFormControl-root {
     width: 100%;
@@ -125,14 +98,16 @@ body {
 
 /* Buttons */
 .button-block {
-    width: 100%;
+    margin-left: 25% !important;
+    width: 50%;
     margin-top: 1rem;
+    background: linear-gradient(45deg, #3949ab, #1e88e5);
     background-color: #3f51b5;
     color: white;
     padding: 0.8rem;
     font-size: 1rem;
     font-weight: bold;
-    border-radius: 5px;
+    border-radius: 20px !important;
     text-transform: uppercase;
     transition: all 0.3s ease;
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
@@ -140,12 +115,15 @@ body {
 }
 
 .button-block:hover {
-    background-color: #2c387e;
-    cursor: pointer;
+    background: linear-gradient(45deg, #1e88e5, #3949ab);
+    transform: scale(1.05); /* Add slight scaling effect */
+    transition: all 0.3s ease-in-out; /* Smooth transition */
 }
 
-/* Radio and Role Selection */
 .role-selection {
+    display: flex;
+    justify-content: center;
+    gap: 1rem; /* Add spacing between buttons */
     margin-top: 1rem;
 }
 
@@ -159,15 +137,23 @@ body {
     color: #3f51b5;
 }
 
-/* Divider for Sign In and Create Account */
-.MuiGrid-spacing-xs-4 {
-    border-right: 2px solid #f0f0f0;
-    padding-right: 2rem;
+/* Individual Sections (Login/Signup) */
+.login-section,
+.signup-section {
+    flex: 1;
+    padding: 1.5rem; /* Increased padding */
+    border-radius: 12px;
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0; /* Slightly darker border */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* More prominent shadow */
+    width: 100%;
+    max-width: 350px; /* Make forms consistent in size */
 }
 
-.MuiGrid-spacing-xs-4:last-child {
+/* Responsive Grid Adjustments */
+.MuiGrid-spacing-xs-4 {
     border-right: none;
-    padding-left: 2rem;
+    padding-right: 0;
 }
 
 /* Link Styling */
@@ -187,27 +173,9 @@ body {
     font-size: 0.9rem;
 }
 
-/* Styling for Sections */
-.login-section, .signup-section {
-    flex: 1;
-    padding: 1rem;
-    border-radius: 8px;
-    background-color: #f9f9f9;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-}
-
-/* Grid Layout Adjustments */
+/* Grid Adjustments */
 .MuiGrid-root {
     padding: 0.5rem;
-}
-
-/* Focus Styles for Inputs */
-.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
-    border-color: #3f51b5;
-}
-
-.MuiInputLabel-outlined.Mui-focused {
-    color: #3f51b5;
 }
 
 /* Degree, Year, and Stream Fields */
@@ -226,21 +194,16 @@ body {
 @media (max-width: 768px) {
     .login-background {
         flex-direction: column;
+        width: 90%; /* Adjust width for smaller screens */
         padding: 1.5rem;
-    }
-
-    .MuiGrid-spacing-xs-4 {
-        border-right: none;
-        border-bottom: 2px solid #f0f0f0;
-        padding-bottom: 1.5rem;
     }
 
     .MuiTypography-root {
         font-size: 1.2rem;
     }
 
-    .login-section, .signup-section {
-        margin-right: 0;
+    .login-section,
+    .signup-section {
         margin-bottom: 1rem;
     }
 
@@ -248,4 +211,3 @@ body {
         flex-direction: column;
     }
 }
-

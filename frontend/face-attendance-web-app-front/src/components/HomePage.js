@@ -1,5 +1,5 @@
 import React from "react";
-import "./HomePage.css";
+import "../style/HomePage.css";
 import MainImage from '../assets/MainImage.png';
 import DigitalEyeIcon from '../assets/digital_eye_icon.png';
 import DigitalLockIcon from '../assets/digital_lock_icon.png';

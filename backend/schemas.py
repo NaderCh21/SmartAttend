@@ -1,6 +1,7 @@
 # schemas.py
 from pydantic import BaseModel, EmailStr
 from datetime import date
+from typing import Optional
 
 class RegisterUser(BaseModel):
     first_name: str
@@ -29,9 +30,11 @@ class CourseResponse(BaseModel):
     name: str
     year: str
     semester: str
+    teacher_id: int
+    instructor: Optional[str]  # New field for instructor's name
 
     class Config:
-        from_attributes = True
+        orm_mode = True
 
 class RecordAttendance(BaseModel):
     student_id: int
@@ -68,6 +71,18 @@ class TeacherResponse(BaseModel):
     email: str
     department: str
     subject: str
+
+    class Config:
+        from_attributes = True
+
+class StudentOut(BaseModel):
+    id: int
+    first_name: str
+    last_name: str
+    roll: str
+    degree: str
+    year: int
+    stream: str
 
     class Config:
         from_attributes = True

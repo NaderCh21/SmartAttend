@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from database import Base, engine
-from routers import auth, course, teacher, face_router , face_matching  
+from routers import auth, course, teacher, face_router , face_matching  , students
 
 app = FastAPI()
 
@@ -31,6 +31,6 @@ app.include_router(face_router.router, prefix="/face", tags=["Face Encoding"])
 
 app.include_router(face_matching.router, prefix="/face-matching", tags=["Face Matching"])
 
-
+app.include_router(students.router, prefix="/students", tags=["Students"]) 
 # To run the app, use the command:
 # uvicorn main:app --reload

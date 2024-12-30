@@ -1,7 +1,7 @@
 import React from 'react';
 import StudentLayout from './StudentLayout';
 import { useParams } from 'react-router-dom';
-import './StudentCourse.css';
+import '../../style/StudentCourse.css'
 
 const StudentCourse = () => {
   const { courseName } = useParams();

@@ -1,7 +1,7 @@
 # routers/course.py
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from models import Course, Registration, AttendanceLog, Student, Sessions
+from models import Course, Registration, AttendanceLog, Student, Sessions , Teacher , User
 from schemas import CourseCreate, CourseResponse, RecordAttendance, AttendanceResponse, RegistrationCreate, RegistrationResponse
 from database import get_db
 from typing import List
@@ -18,7 +18,40 @@ def get_courses_for_teacher(teacher_id: int, db: Session = Depends(get_db)):
 # Endpoint to get all available courses (for students to see all courses)
 @router.get("/", response_model=List[CourseResponse])
 def get_all_courses(db: Session = Depends(get_db)):
-    return db.query(Course).all()
+    courses = (
+        db.query(
+            Course.id,
+            Course.name,
+            Course.year,
+            Course.semester,
+            Teacher.id.label("teacher_id"),
+            User.first_name.label("instructor_first_name"),
+            User.last_name.label("instructor_last_name"),
+        )
+        .outerjoin(Teacher, Course.teacher_id == Teacher.id)
+        .outerjoin(User, Teacher.user_id == User.id)
+        .all()
+    )
+
+    print("Courses fetched: ", courses)  # Debugging line
+
+    response = [
+        {
+            "id": course.id,
+            "name": course.name,
+            "year": course.year,
+            "semester": course.semester,
+            "teacher_id": course.teacher_id,
+            "instructor": (
+                f"{course.instructor_first_name or 'N/A'} {course.instructor_last_name or ''}".strip()
+            ),
+        }
+        for course in courses
+    ]
+
+    print("Response data: ", response)  # Debugging line
+    return response
+
 
 # Endpoint to get all registered courses for a specific student
 @router.get("/students/{student_id}/courses", response_model=List[CourseResponse])
@@ -29,13 +62,23 @@ def get_registered_courses_for_student(student_id: int, db: Session = Depends(ge
 
 #Endpoint to register a course
 @router.post("/students/registercourse", response_model=RegistrationResponse)
-def register_course_for_student ( register:RegistrationCreate,db: Session = Depends(get_db)):
-    new_registration = Registration(**register.dict())
-    db.add(new_registration)
-    db.commit()
-    db.refresh(new_registration)
+def register_course_for_student(register: RegistrationCreate, db: Session = Depends(get_db)):
+    try:
+        new_registration = Registration(**register.dict())
+        db.add(new_registration)
+        db.commit()
+        db.refresh(new_registration)
+        return {
+            "id": new_registration.id,
+            "student_id": new_registration.student_id,
+            "course_id": new_registration.course_id
+        }
+    except Exception as e:
+        print(f"Registration Error: {e}")  # Log error for debugging
+        raise HTTPException(status_code=500, detail=f"Failed to register the course: {str(e)}")
 
-    return new_registration
+
+
 # Endpoint to create a new course
 @router.post("/", response_model=CourseResponse)
 def create_course(course: CourseCreate, db: Session = Depends(get_db)):

@@ -187,8 +187,8 @@
 
 // export default TeacherDashboard;
 import React, { useState } from "react";
-import FaceRecognition from "./FaceRecognition";
-import DashboardLayout from "./DashboardLayout";
+import FaceRecognition from "../FaceRecognition";
+import DashboardLayout from "../DashboardLayout";
 import axios from "axios";
 
 const TeacherDashboard = () => {

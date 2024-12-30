@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import './DashboardLayout.css';
+import '../style/DashboardLayout.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHome, faBook, faUserGraduate } from '@fortawesome/free-solid-svg-icons';
 
@@ -95,7 +95,9 @@ const DashboardLayout = ({ children, teacherId }) => {
 
       {/* Main Content */}
       <main className="main-content">
-      <header className="dashboard-header">
+  
+  
+  <header className="dashboard-header">
   <div className="search-container">
     <input type="text" placeholder="Search for courses, students..." className="search-bar" />
   </div>

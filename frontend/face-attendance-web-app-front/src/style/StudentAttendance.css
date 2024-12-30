@@ -1,0 +1,31 @@
+.student-attendance-page {
+    padding: 2rem;
+}
+
+.attendance-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+.attendance-table th, .attendance-table td {
+    border: 1px solid #ddd;
+    padding: 0.8rem;
+    text-align: left;
+}
+
+.attendance-table th {
+    background-color: #f4f6f8;
+    font-weight: bold;
+}
+
+.attendance-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.loader {
+    text-align: center;
+    margin-top: 2rem;
+    font-size: 1.2rem;
+    color: #3949ab;
+}

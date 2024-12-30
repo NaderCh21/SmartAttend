@@ -14,9 +14,8 @@ import {
   FormLabel,
 } from "@material-ui/core";
 import { Alert } from "@material-ui/lab";
-import "./LoginApp.css";
 import FaceCapture from "./FaceCapture";
-
+import "../../src/style/LoginApp.css"
 const LoginApp = () => {
   const navigate = useNavigate();
   const [loginData, setLoginData] = useState({ email: "", password: "" });

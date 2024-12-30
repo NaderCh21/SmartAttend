@@ -1,6 +1,5 @@
 import React from 'react';
-import './AttendancePage.css'; // Create a CSS file for this component
-
+import '../style/AttendancePage.css'
 const AttendancePage = () => {
   return (
     <div className="attendance-page">

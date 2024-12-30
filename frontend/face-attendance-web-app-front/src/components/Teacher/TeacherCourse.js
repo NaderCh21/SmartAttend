@@ -1,6 +1,6 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import './TeacherCourse.css';  // Import the CSS
+import '../../style/TeacherCourse.css';
 
 const TeacherCourse = () => {
   const { courseName } = useParams();

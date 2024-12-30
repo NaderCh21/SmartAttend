@@ -1,6 +1,5 @@
 import React from 'react';
-import './AttendanceCircle.css';
-
+import '../style/AttendanceCircle.css'
 const AttendanceCircle = ({ percentage, name }) => (
   <div className="attendance-item">
     <div className="attendance-circle">

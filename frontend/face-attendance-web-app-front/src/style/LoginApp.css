@@ -47,10 +47,10 @@ body {
     gap: 3rem; /* Add spacing between the forms */
     width: 90%; /* Adjust the overall width */
     max-width: 700px; /* Limit max width */
-    padding: 2rem;
+    padding: 0.7rem 0.7rem;
     background-color: #ffffff;
     border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 10px rgba(66, 22, 22, 0.1);
 }
 /* Typography */
 .MuiTypography-root {
@@ -70,14 +70,12 @@ body {
     border: solid 0.2px #ffffff !important;
 
     width: 100%;
-    max-width: 350px; /* Limit field width */
     margin-bottom: 10px !important;
 }
 
 
 
 .MuiOutlinedInput-root {
-    border: 1px solid #cfd8dc !important; /* Light gray for borders */
     border-radius: 6px !important; /* Rounded corners */
     height: 40px;
     font-size: 0.95rem;
@@ -98,7 +96,7 @@ body {
 
 /* Buttons */
 .button-block {
-    margin-left: 25% !important;
+    margin: 1rem auto !important;
     width: 50%;
     margin-top: 1rem;
     background: linear-gradient(45deg, #3949ab, #1e88e5);
@@ -144,8 +142,6 @@ body {
     padding: 1.5rem; /* Increased padding */
     border-radius: 12px;
     background-color: #ffffff;
-    border: 1px solid #e0e0e0; /* Slightly darker border */
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* More prominent shadow */
     width: 100%;
     max-width: 350px; /* Make forms consistent in size */
 }

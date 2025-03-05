@@ -56,14 +56,59 @@ def get_all_courses(db: Session = Depends(get_db)):
 # Endpoint to get all registered courses for a specific student
 @router.get("/students/{student_id}/courses", response_model=List[CourseResponse])
 def get_registered_courses_for_student(student_id: int, db: Session = Depends(get_db)):
+    # Query registrations to get course_ids for the student
     registrations = db.query(Registration).filter(Registration.student_id == student_id).all()
     course_ids = [registration.course_id for registration in registrations]
-    return db.query(Course).filter(Course.id.in_(course_ids)).all()
+
+    # If no courses are registered, return an empty list
+    if not course_ids:
+        return []
+
+    # Query course details for the registered courses
+    courses = (
+        db.query(
+            Course.id,
+            Course.name,
+            Course.year,
+            Course.semester,
+            Teacher.id.label("teacher_id"),
+            User.first_name.label("instructor_first_name"),
+            User.last_name.label("instructor_last_name"),
+        )
+        .join(Teacher, Course.teacher_id == Teacher.id)
+        .join(User, Teacher.user_id == User.id)
+        .filter(Course.id.in_(course_ids))
+        .all()
+    )
+
+    # Format the response
+    response = [
+        {
+            "id": course.id,
+            "name": course.name,
+            "year": course.year,
+            "semester": course.semester,
+            "teacher_id": course.teacher_id,
+            "instructor": f"{course.instructor_first_name or 'N/A'} {course.instructor_last_name or ''}".strip(),
+        }
+        for course in courses
+    ]
+
+    return response
 
 #Endpoint to register a course
 @router.post("/students/registercourse", response_model=RegistrationResponse)
 def register_course_for_student(register: RegistrationCreate, db: Session = Depends(get_db)):
     try:
+        # Check if the student is already registered for the course
+        existing_registration = db.query(Registration).filter(
+            Registration.student_id == register.student_id,
+            Registration.course_id == register.course_id
+        ).first()
+        if existing_registration:
+            raise HTTPException(status_code=400, detail="Student is already registered for this course")
+
+        # Proceed with registration
         new_registration = Registration(**register.dict())
         db.add(new_registration)
         db.commit()

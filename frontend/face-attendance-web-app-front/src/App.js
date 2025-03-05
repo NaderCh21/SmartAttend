@@ -1,15 +1,14 @@
-
 import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import TeacherDashboard from "./components/Teacher/TeacherDashboard";
 import TeacherCourse from "./components/Teacher/TeacherCourse";
 import StudentDashboard from "./components/Student/StudentDashboard";
-import StudentCourse from "./components/Student/StudentCourse";
-import StudentAttendance from "./components/Student/StudentAttendance"
+import StudentAttendance from "./components/Student/StudentAttendance";
 import AllCoursesPage from "./components/Student/AllCoursesPage";
 import AttendancePage from "./components/AttendancePage";
-import LoginApp from "./components/LoginApp";
-import HomePage from "./components/HomePage";
+import LoginApp from "./components/LoginPage/LoginApp";
+import HomePage from "./components/HomePage/HomePage";
+import MyCoursesPage from "./components/Student/MyCoursesPage";
 
 function App() {
   return (
@@ -26,10 +25,12 @@ function App() {
 
         {/* Student Routes */}
         <Route path="/student/dashboard" element={<StudentDashboard />} />
-        <Route path="/student/course/:courseName" element={<StudentCourse />} />
-        <Route path="/student/course/:courseId/attendance" element={<StudentAttendance />} /> 
+        <Route
+          path="/student/course/:courseId/attendance"
+          element={<StudentAttendance />}
+        />
         <Route path="/student/all-courses" element={<AllCoursesPage />} />
-
+        <Route path="/student/courses" element={<MyCoursesPage />} />
       </Routes>
     </Router>
   );

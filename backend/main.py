@@ -21,7 +21,7 @@ app.add_middleware(
 app.include_router(auth.router)
 
 # Include course routes
-app.include_router(course.router, prefix="/courses")
+app.include_router(course.router)
 
 # Include teacher routes
 app.include_router(teacher.router, prefix="/teachers", tags=["Teachers"])

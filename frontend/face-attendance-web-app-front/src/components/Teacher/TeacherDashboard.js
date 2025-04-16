@@ -200,6 +200,7 @@ const TeacherDashboard = () => {
     semester: "",
     year: "",
     teacher_id: ""
+
   });
 
   const handleInputChange = (e) => {
@@ -219,7 +220,7 @@ const TeacherDashboard = () => {
   };
     try {
      
-      const response = await axios.post("http://localhost:8000/courses", courseData);
+      const response = await axios.post("http://localhost:8000/teachers/createcourse", courseData);
       const { name  } = response.data;
       
       alert(`Course "${name}" created successfully!`);
@@ -276,6 +277,7 @@ const TeacherDashboard = () => {
                   />
                 </label>
               </div>
+              
               <div style={{ marginBottom: "10px" }}>
                 <label>
                   Semester:
@@ -300,6 +302,7 @@ const TeacherDashboard = () => {
                   />
                 </label>
               </div>
+              
               <button
                 onClick={handleCreateCourse}
                 style={{

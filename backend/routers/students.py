@@ -25,3 +25,4 @@ def get_student(student_id: int, db: Session = Depends(get_db)):
         "year": student.year,
         "stream": student.stream,
     }
+

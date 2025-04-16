@@ -21,6 +21,7 @@ const TeacherCourse = () => {
         <p><strong>Course Name:</strong> {course.name}</p>
         <p><strong>Year:</strong> {course.year}</p>
         <p><strong>Semester:</strong> {course.semester}</p>
+        <p><strong>Duration:</strong> {course.duration}</p>
       </div>
     </div>
   );

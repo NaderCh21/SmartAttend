@@ -28,11 +28,11 @@ const AllCoursesPage = () => {
         setLoading(true);
 
         // Fetch all courses
-        const allCoursesRes = await axios.get("http://localhost:8000/");
+        const allCoursesRes = await axios.get("http://localhost:8000/courses/");
 
         // Fetch student’s registered courses
         const registeredRes = await axios.get(
-          `http://localhost:8000/students/${studentId}/courses`
+          `http://localhost:8000/courses/students/${studentId}/courses`
         );
 
         // Save them in state
@@ -72,7 +72,7 @@ const AllCoursesPage = () => {
         // 1) Re-fetch registered courses,
         // 2) Filter out the newly registered from availableCourses
         const registeredRes = await axios.get(
-          `http://localhost:8000/students/${studentId}/courses`
+          `http://localhost:8000/courses/students/${studentId}/courses`
         );
         const updatedRegistered = registeredRes.data;
 

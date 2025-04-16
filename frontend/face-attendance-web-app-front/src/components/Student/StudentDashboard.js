@@ -15,7 +15,7 @@ const StudentDashboard = () => {
     const fetchRegisteredCourses = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:8000/students/${studentId}/courses`
+          `http://localhost:8000/courses/students/${studentId}/courses`
         );
         setRegisteredCourses(response.data);
       } catch (error) {

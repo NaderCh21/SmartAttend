@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from "react";
 import axios from "axios";
 
-const FaceRecognition = ({ onClose }) => {
+const FaceRecognition = ({ onClose, sessionId }) => {
   const videoRef = useRef(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -54,8 +54,7 @@ const FaceRecognition = ({ onClose }) => {
       const imageData = canvas.toDataURL("image/png"); // Convert to Base64
 
       // Send the captured frame to the backend for recognition
-      const response = await axios.post(
-        "http://localhost:8000/face-matching/recognize",
+      const response = await axios.post(`http://localhost:8000/face_matching_testing/recognize/${sessionId}`,
         { image: imageData },
         {
           headers: {
